@@ -12,7 +12,7 @@ ADD ./build/libs/*.war /opt/ibm/wlp/usr/servers/defaultServer/apps
 
 EXPOSE 80
 
-ENV MONGO_HOST=acmeair_db
+ENV MONGO_HOST=acmeair-db
 ENV MONGO_DBNAME=acmeair
 
 CMD ["/opt/ibm/wlp/bin/server", "run", "defaultServer"]

@@ -1,4 +1,4 @@
-FROM websphere-liberty:kernel
+FROM was-liberty:kernel
 
 ADD Dockerfile /root/Dockerfile
 

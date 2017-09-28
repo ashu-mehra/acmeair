@@ -1,6 +1,6 @@
 
 task wrapper(type: Wrapper) {
-   gradleVersion = '2.6'
+   gradleVersion = '4.2'
 }
 
 subprojects {
@@ -39,7 +39,8 @@ project(':acmeair-webapp') {
         options.compilerArgs << modulePath
         options.compilerArgs << '--add-reads'
         options.compilerArgs << 'acmeair.webapp=ALL-UNNAMED'
-
+        options.compilerArgs << '--add-reads'
+        options.compilerArgs << 'acmeair.services=ALL-UNNAMED'
     }
 
     dependencies {
@@ -89,7 +90,8 @@ project(':acmeair-as') {
         options.compilerArgs << modulePath
         options.compilerArgs << '--add-reads'
         options.compilerArgs << 'acmeair.as=ALL-UNNAMED'
-
+	options.compilerArgs << '--add-reads'
+	options.compilerArgs << 'acmeair.services=ALL-UNNAMED'
     }
 
     dependencies {
@@ -193,21 +195,50 @@ project(':acmeair-ss') {
 }
 
 project(':acmeair-services-mongo') {
+
+
+    def servicesJar = project(':acmeair-services').jar.outputs.files.getAsPath()
+    def files = [servicesJar]
+
+    def modulePath = files.join("$File.pathSeparator")
+
+    tasks.withType(JavaCompile) {
+        options.compilerArgs << '--module-path'
+        options.compilerArgs << modulePath
+        options.compilerArgs << '--add-reads'
+        options.compilerArgs << 'acmeair.services.mongo=ALL-UNNAMED'
+    }
     dependencies {
-		compile project(':acmeair-services')
-		compile 'org.mongodb:mongo-java-driver:3.1.1'
-		compile 'org.mongodb:bson:3.1.1'
+	compile project(':acmeair-services')
+	compile 'org.mongodb:mongo-java-driver:3.1.1'
+	compile 'org.mongodb:bson:3.1.1'
         compile 'com.googlecode.json-simple:json-simple:1.1.1'
     }
 }
 
 project(':acmeair-services') {
+    tasks.withType(JavaCompile) {
+        options.compilerArgs << '--add-reads'
+        options.compilerArgs << 'acmeair.services=ALL-UNNAMED'
+    }
+
     dependencies {
         compile 'com.googlecode.json-simple:json-simple:1.1.1'
     }
 }
 
 project(':acmeair-loader') {
+
+    def servicesJar = project(':acmeair-services').jar.outputs.files.getAsPath()
+    def files = [servicesJar]
+
+    def modulePath = files.join("$File.pathSeparator")
+
+    tasks.withType(JavaCompile) {
+        options.compilerArgs << '--module-path'
+        options.compilerArgs << modulePath
+    }
+
     dependencies {
         compile project(':acmeair-services')
     }

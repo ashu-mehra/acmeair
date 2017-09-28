@@ -4,5 +4,4 @@ module acmeair.bs {
 	requires java.naming;
         requires acmeair.loader;
         requires acmeair.services;
-        requires acmeair.services.mongo;
 }

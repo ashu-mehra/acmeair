@@ -1,4 +1,6 @@
-FROM websphere-liberty:kernel
+FROM websphere-liberty:openj9-nightly
+
+USER root
 
 ADD Dockerfile /root/Dockerfile
 

@@ -1,4 +1,4 @@
-FROM websphere-liberty:kernel
+FROM ashumehra/websphere-liberty:openj9-nightly
 
 USER root
 

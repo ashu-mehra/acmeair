@@ -1,11 +1,12 @@
 #!/bin/bash
 
 source ./util.sh
+source ./common_env_vars.sh
+
 CHECKPOINT_SUCCESS_MSG="Checkpoint success"
 CR_LOG_DIR="/root/appcr/cr_logs"
 DUMP_LOG_FILE="dump.log"
-image_name=$1
-tmp_image_name="tmp-${image_name}"
+tmp_image_name="${APP_DOCKER_IMAGE}-tmp"
 container_name="app-container-for-cr"
 
 build_docker_image() {
@@ -58,9 +59,9 @@ wait_for_checkpoint() {
 commit_container() {
 	docker cp "${container_name}":"${CR_LOG_DIR}"/"${DUMP_LOG_FILE}" .
 
-	echo "CMD: docker commit ${container_name} ${image_name}"
+	echo "CMD: docker commit ${container_name} ${APP_CR_DOCKER_IMAGE}"
 
-	docker commit "${container_name}" "${image_name}"
+	docker commit "${container_name}" "${APP_CR_DOCKER_IMAGE}"
 
 	echo "INFO: New docker image with checkpoint created"
 
@@ -73,6 +74,9 @@ commit_container() {
 	docker stop "${container_name}" &> /dev/null
 
 	docker rm "${container_name}" &> /dev/null
+
+	echo "Cleaning temporary container image"
+	docker rmi "${tmp_image_name}"
 }
 
 build_docker_image

@@ -1,4 +1,4 @@
-FROM acmeair_liberty:latest
+FROM ashumehra/acmeair-monolithic:latest
 
 USER root
 ARG workdir

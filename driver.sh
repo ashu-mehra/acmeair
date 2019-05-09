@@ -79,7 +79,28 @@ commit_container() {
 	docker rmi "${tmp_image_name}"
 }
 
+upload_image() {
+	echo "Uploading image to dockerhub..."
+	echo "CMD: docker push ${APP_CR_DOCKER_IMAGE}"
+	docker push ${APP_CR_DOCKER_IMAGE}
+	echo "Uploading done"
+}
+
+upload_image=0
+
+for i in "$@"; do
+        case $i in
+		-u )
+			upload_image=1
+			;;
+	esac
+done
+
 build_docker_image
 run_container
 wait_for_checkpoint
 commit_container
+
+if [ "${upload_image}" -eq 1 ]; then
+	upload_image
+fi

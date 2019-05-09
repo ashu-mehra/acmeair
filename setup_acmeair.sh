@@ -39,5 +39,23 @@ function create_acmeair_server_image() {
 	fi
 }
 
-create_acmeair_server_image
+upload_image() {
+	echo "Uploading image to dockerhub..."
+	echo "CMD: docker push ${APP_DOCKER_IMAGE}"
+	docker push ${APP_DOCKER_IMAGE}
+	echo "Uploading done"
+}
 
+upload_image=0
+for i in "$@"; do
+        case $i in
+		-u )
+			upload_image=1
+			;;
+	esac
+done
+
+create_acmeair_server_image
+if [ "${upload_image}" -eq 1 ]; then
+	upload_image
+fi

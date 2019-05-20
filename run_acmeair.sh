@@ -83,7 +83,13 @@ else
 	echo "INFO: Mongo db container is already running"
 fi
 
-capabilities="--cap-add DAC_OVERRIDE --cap-add CHOWN --cap-add SETPCAP --cap-add SETGID --cap-add AUDIT_CONTROL --cap-add DAC_READ_SEARCH --cap-add NET_ADMIN --cap-add SYS_ADMIN --cap-add SYS_CHROOT --cap-add SYS_PTRACE --cap-add FOWNER --cap-add KILL --cap-add FSETID --cap-add SYS_RESOURCE --cap-add SETUID"
+# This is the list of all capabilities required for C/R. 
+# Some of them are already present by default in Docker container as listed at https://github.com/moby/moby/blob/master/oci/defaults.go#L14-L30
+#capabilities="--cap-add DAC_OVERRIDE --cap-add CHOWN --cap-add SETPCAP --cap-add SETGID --cap-add AUDIT_CONTROL --cap-add DAC_READ_SEARCH --cap-add NET_ADMIN --cap-add SYS_ADMIN --cap-add SYS_CHROOT --cap-add SYS_PTRACE --cap-add FOWNER --cap-add KILL --cap-add FSETID --cap-add SYS_RESOURCE --cap-add SETUID"
+
+# This is the list of additional capabilities required after removing the ones already available.
+capabilities="--cap-add AUDIT_CONTROL --cap-add DAC_READ_SEARCH --cap-add NET_ADMIN --cap-add SYS_ADMIN --cap-add SYS_PTRACE --cap-add SYS_RESOURCE"
+
 echo "CMD: docker run --name="${app_container}" "${capabilities}" --security-opt apparmor=unconfined --security-opt seccomp=unconfined -d -p 80:80 --network="${DOCKER_NETWORK}" --ip='172.28.0.3' -e MONGO_HOST="${MONGO_DB_CONTAINER}" "${app_image}""
 
 acmeair_server=`docker run --name=${app_container} ${capabilities} --security-opt apparmor=unconfined --security-opt seccomp=unconfined -d -p 80:80 --network=${DOCKER_NETWORK} --ip='172.28.0.3' -e MONGO_HOST=${MONGO_DB_CONTAINER} ${app_image}`

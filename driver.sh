@@ -3,15 +3,13 @@
 source ./util.sh
 source ./common_env_vars.sh
 
-CHECKPOINT_SUCCESS_MSG="Checkpoint success"
-CR_LOG_DIR="/root/appcr/cr_logs"
-DUMP_LOG_FILE="dump.log"
 tmp_image_name="${APP_DOCKER_IMAGE}-tmp"
 container_name="app-container-for-cr"
 
 build_docker_image() {
-	echo "CMD: docker build -q -t "${tmp_image_name}" -f Dockerfile ."
-	docker build -t "${tmp_image_name}" -f Dockerfile .
+	cmd="docker build --build-arg user=1001 -q -t "${tmp_image_name}" -f Dockerfile ."
+	echo "CMD: ${cmd}"
+	${cmd}
 
 	check_image_exists "${tmp_image_name}"
 	if [ $? -eq 1 ]; then
@@ -41,6 +39,7 @@ wait_for_checkpoint() {
 			echo "ERROR: container has stopped"
 			exit 1
 		fi
+
                 docker logs --tail=1 "${container_name}" | grep "${CHECKPOINT_SUCCESS_MSG}" &> /dev/null
 
                 if [ $? -eq 0 ]; then
@@ -57,50 +56,29 @@ wait_for_checkpoint() {
 }
 
 commit_container() {
-	docker cp "${container_name}":"${CR_LOG_DIR}"/"${DUMP_LOG_FILE}" .
+	cmd="docker cp "${container_name}":"${CR_LOG_DIR}"/"${DUMP_LOG_FILE}" ."
+	echo "CMD: ${cmd}"
+	${cmd}
 
-	echo "CMD: docker commit ${container_name} ${APP_CR_DOCKER_IMAGE}"
+	cmd="docker commit "${container_name}" "${APP_CR_DOCKER_IMAGE}""
+	echo "CMD: ${cmd}"
+	${cmd}
 
-	docker commit "${container_name}" "${APP_CR_DOCKER_IMAGE}"
-
-	echo "INFO: New docker image with checkpoint created"
+	echo "INFO: New docker image "${APP_CR_DOCKER_IMAGE}" containing application checkpoint created"
 
 	echo "INFO: Stopping the container"
 
-	docker kill -s SIGUSR1 "${container_name}" &> /dev/null
+	cmd="docker stop "${container_name}""
+	echo "CMD: ${cmd}"
+	${cmd} &> /dev/null
 
-	sleep 5s
-
-	docker stop "${container_name}" &> /dev/null
-
-	docker rm "${container_name}" &> /dev/null
-
-	echo "Cleaning temporary container image"
-	docker rmi "${tmp_image_name}"
+	cmd="docker rm "${container_name}""
+	echo "CMD: ${cmd}"
+	${cmd} &> /dev/null
 }
-
-upload_image() {
-	echo "Uploading image to dockerhub..."
-	echo "CMD: docker push ${APP_CR_DOCKER_IMAGE}"
-	docker push ${APP_CR_DOCKER_IMAGE}
-	echo "Uploading done"
-}
-
-upload_image=0
-
-for i in "$@"; do
-        case $i in
-		-u )
-			upload_image=1
-			;;
-	esac
-done
 
 build_docker_image
 run_container
 wait_for_checkpoint
 commit_container
 
-if [ "${upload_image}" -eq 1 ]; then
-	upload_image
-fi

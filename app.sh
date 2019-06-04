@@ -39,6 +39,7 @@ start_app() {
 }
 
 stop_app() {
+	echo "Stopping application"
 	/opt/ibm/wlp/bin/server stop defaultServer
 
 }
